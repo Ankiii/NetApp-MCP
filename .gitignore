@@ -1,0 +1,12 @@
+# Environments
+.env
+__pycache__/
+*.pyc
+
+# Database and learned parsers (users should generate their own)
+db/*.db
+db/learned_parsers.py
+
+# OS generated files
+.DS_Store
+Thumbs.db

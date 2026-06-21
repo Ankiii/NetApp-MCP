@@ -1,0 +1,5 @@
+TRAINING QUERY:
+
+Run an unsupervised auto-discovery of my entire logs directory. Once you have finished learning every file format, automatically ingest the directory to build the database schema.
+
+/run unsupervised_auto_discovery

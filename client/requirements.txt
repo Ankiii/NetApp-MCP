@@ -1,0 +1,4 @@
+mcp[cli]>=1.0.0
+pandas>=2.0.0
+google-generativeai
+openai>=1.0.0

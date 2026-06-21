@@ -1,0 +1,51 @@
+#services:
+#  ollama:
+#    image: ollama/ollama:latest
+#    container_name: netapp_ollama
+#    ports:
+#      - "11434:11434"
+#    volumes:
+#      - ollama_data:/root/.ollama
+#
+#  agent_client:
+#    build: ./client
+#    container_name: netapp_agent
+#    environment:
+#      - OLLAMA_BASE_URL=http://ollama:11434/v1
+#    volumes:
+#      # Logs are mounted directly to the agent container
+#      - E:/WSL/data/work:/logs
+#    stdin_open: true
+#    tty: true
+#    depends_on:
+#      - ollama
+#
+#volumes:
+#  ollama_data:
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: netapp_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  agent_client:
+    build: ./client
+    container_name: netapp_agent
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # This dynamically maps the user's local directory to /logs
+      - ${LOG_DIR:-./logs}:/logs:ro
+      - ./db:/app/db
+    stdin_open: true
+    tty: true
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
