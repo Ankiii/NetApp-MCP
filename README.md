@@ -37,3 +37,34 @@ During the initial setup, the agent requires internet access to communicate with
    ```bash
    git clone [https://github.com/Ankiii/NetApp-MCP.git](https://github.com/Ankiii/NetApp-MCP.git)
    cd NetApp-MCP
+   
+### Instructions
+
+1. Configure your environment:
+Create a .env file in the root directory:
+
+
+GEMINI_API_KEY=your_gemini_api_key_here
+LOG_DIR=/path/to/your/raw/logs
+
+2. Build and start the environment:
+
+docker-compose up -d --build
+
+3. Attach to the interactive agent console:
+
+docker attach netapp_agent
+
+4. Instruct the Master Agent to discover and learn your log formats:
+
+/run unsupervised_auto_discovery
+
+Note: Rate limits may apply depending on your Gemini API tier. The agent has built-in throttling to accommodate standard limits.
+
+5. Build the Database:
+
+Master Agent > /run auto_ingest_directory
+
+6. Once the universal_index.db is built and the parsers are generated, the system is ready for offline use (export latest ollama/ollama and mcp_netapp_project-agent_client images and then load the same)
+
+
