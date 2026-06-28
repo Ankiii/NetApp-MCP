@@ -10,3 +10,13 @@ db/learned_parsers.py
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Sensitive Data & Local Environment
+.env
+db/*.db
+*.zip
+client/query.txt
+
+# Python caches
+__pycache__/
+*.pyc

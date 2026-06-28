@@ -1,28 +1,3 @@
-#services:
-#  ollama:
-#    image: ollama/ollama:latest
-#    container_name: netapp_ollama
-#    ports:
-#      - "11434:11434"
-#    volumes:
-#      - ollama_data:/root/.ollama
-#
-#  agent_client:
-#    build: ./client
-#    container_name: netapp_agent
-#    environment:
-#      - OLLAMA_BASE_URL=http://ollama:11434/v1
-#    volumes:
-#      # Logs are mounted directly to the agent container
-#      - E:/WSL/data/work:/logs
-#    stdin_open: true
-#    tty: true
-#    depends_on:
-#      - ollama
-#
-#volumes:
-#  ollama_data:
-
 services:
   ollama:
     image: ollama/ollama:latest
@@ -32,12 +7,41 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
+  # One-shot helper: pulls the two local models the system needs, then exits.
+  # This is the ONLY step that still needs internet access (downloading model
+  # weights once) - everything after this, including learning new log
+  # formats, runs fully offline. Re-running `docker-compose up` later is a
+  # no-op here since Ollama skips models it already has cached in the
+  # ollama_data volume.
+  ollama-init:
+    image: curlimages/curl:latest
+    container_name: netapp_ollama_init
+    depends_on:
+      - ollama
+    environment:
+      - AGENT_MODEL=${AGENT_MODEL:-llama3.1}
+      - PARSER_MODEL=${PARSER_MODEL:-qwen2.5-coder:7b}
+    entrypoint:
+      - sh
+      - -c
+      - >
+        until curl -s http://ollama:11434/api/tags > /dev/null; do sleep 2; done;
+        echo "Pulling agent model: $$AGENT_MODEL";
+        curl -s http://ollama:11434/api/pull -d "{\"name\":\"$$AGENT_MODEL\"}";
+        echo "Pulling parser model: $$PARSER_MODEL";
+        curl -s http://ollama:11434/api/pull -d "{\"name\":\"$$PARSER_MODEL\"}";
+        echo "Models ready."
+
   agent_client:
     build: ./client
     container_name: netapp_agent
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434/v1
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - AGENT_MODEL=${AGENT_MODEL:-llama3.1}
+      - PARSER_MODEL=${PARSER_MODEL:-qwen2.5-coder:7b}
+      - PROMPT_REGEX=${PROMPT_REGEX:-}
+      - MAX_EXTRACT_SIZE_MB=${MAX_EXTRACT_SIZE_MB:-100}
+      - MAX_ARCHIVE_DEPTH=${MAX_ARCHIVE_DEPTH:-4}
     volumes:
       # This dynamically maps the user's local directory to /logs
       - ${LOG_DIR:-./logs}:/logs:ro
@@ -45,7 +49,10 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - ollama
+      ollama:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
 
 volumes:
   ollama_data:
