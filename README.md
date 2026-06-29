@@ -8,6 +8,12 @@ Fully local and air-gap friendly. Both the parser-writing step and the query ste
 against **local Ollama models** - no cloud API, no API key, no rate limit. The only step
 that ever touches the internet is the one-time download of the Ollama model weights.
 
+[! [Docker Pulls] (https://img.shields.io/docker/pulls/watsayan1/netapp-mcp)] (https://hub.docker.com/r/watsayan1/netapp-mcp)
+
+### Quick Start
+```bash
+docker pull watsayan1/netapp-mcp:latest
+
 ---
 
 ## 🚀 Key Features
